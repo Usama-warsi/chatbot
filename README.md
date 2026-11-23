@@ -35,6 +35,7 @@ Or start it yourself:
 | `apiUrl`    | Optional API URL with the website's data        |
 | `icon`      | Avatar image URL                                |
 | `poweredBy` | "Powered by ..." text                           |
+| `poweredByUrl` | Link for the "Powered by" text (http/https)  |
 | `domain`    | Defaults to the current site                    |
 | `backend`   | n8n webhook URL                                 |
 

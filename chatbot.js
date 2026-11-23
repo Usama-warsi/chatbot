@@ -10,6 +10,7 @@
  *       apiUrl: "",      // optional: URL of this website's data API
  *       icon: "",        // optional: avatar image URL
  *       poweredBy: "",   // optional: "Powered by ..." text
+ *       poweredByUrl: "", // optional: link for the "Powered by" text
  *       domain: "",      // optional: defaults to the current site
  *       backend: ""      // optional: n8n webhook URL
  *     };
@@ -41,6 +42,7 @@ const CHAT_CONFIG = {
     color: "#0d6efd",
     icon: "",
     poweredBy: "",
+    poweredByUrl: "",
     // Text prompt: tell the bot who it is and what it knows about this website
     prompt: "You are a friendly assistant for this website. Help visitors with their questions about our services.",
     // Optional: API URL that returns this website's data (packages, products, prices...). Leave "" if none.
@@ -50,7 +52,7 @@ const CHAT_CONFIG = {
 
 const AI_CHAT_CSS = "#ai-chat-toggle {\n    position: fixed;\n    bottom: 25px;\n    right: 25px;\n    background: linear-gradient(135deg, var(--ai-accent) 0%, var(--ai-accent-2) 100%);\n    color: white;\n    border-radius: 50%;\n    width: 70px;\n    height: 70px;\n    border: none;\n    cursor: pointer;\n    font-size: 28px;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    z-index: 9999;\n    box-shadow: 0 8px 24px var(--ai-accent-shadow);\n    transition: all 0.3s ease;\n    transform: scale(1);\n    padding:10px;\n}\n\n#ai-chat-toggle:hover {\n    transform: scale(1.1);\n    box-shadow: 0 12px 32px var(--ai-accent-shadow);\n}\n\n#ai-chat-toggle:active {\n    transform: scale(0.95);\n}\n\n/* Small badge shown when chat is hidden */\n#ai-chat-badge {\n    position: fixed;\n    bottom: 100px;\n    right: 25px;\n    background: rgba(var(--ai-accent-rgb), 0.96);\n    color: white;\n    border: none;\n    padding: 8px 12px;\n    border-radius: 999px;\n    box-shadow: 0 8px 24px var(--ai-accent-shadow);\n    font-size: 13px;\n    cursor: pointer;\n    z-index: 9998;\n    display: flex;\n    align-items: center;\n    gap: 8px;\n    transition: opacity 0.5s ease, transform 0.5s ease;\n    opacity: 0;\n    pointer-events: none;\n}\n\n#ai-chat-badge.visible {\n    opacity: 1;\n    pointer-events: auto;\n    animation: badgePulse 0.5s ease-out;\n}\n\n#ai-chat-badge:hover {\n    transform: translateY(-3px);\n    box-shadow: 0 12px 32px var(--ai-accent-shadow);\n}\n\n#ai-chat-badge:focus {\n    outline: none;\n    box-shadow: 0 0 0 4px var(--ai-accent-focus);\n}\n\n@keyframes badgePulse {\n    0% {\n        opacity: 0;\n        transform: scale(0.8) translateY(10px);\n    }\n    100% {\n        opacity: 1;\n        transform: scale(1) translateY(0);\n    }\n}\n\n#ai-chat-container {\n    position: fixed;\n    bottom: 90px;\n    right: 25px;\n    width: 380px;\n    max-height: 600px;\n    background: #fff;\n    border-radius: 16px;\n    box-shadow: 0 20px 60px rgba(0,0,0,0.15);\n    display: flex;\n    flex-direction: column;\n    overflow: hidden;\n    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;\n    z-index: 9999;\n    display: none;\n    animation: slideUp 0.3s ease-out;\n}\n\n@keyframes slideUp {\n    from {\n        opacity: 0;\n        transform: translateY(20px);\n    }\n    to {\n        opacity: 1;\n        transform: translateY(0);\n    }\n}\n\n#ai-chat-container.dark {\n    background: #1f2937;\n    color: #f3f4f6;\n}\n\n#ai-chat-header {\n    padding: 16px;\n    background: linear-gradient(135deg, var(--ai-accent) 0%, var(--ai-accent-2) 100%);\n    color: white;\n    font-weight: 600;\n    cursor: grab;\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    font-size: 15px;\n    letter-spacing: 0.3px;\n}\n\n#ai-chat-header.dark {\n    background: #111827;\n    color: #f3f4f6;\n}\n\n#ai-chat-body {\n    flex: 1;\n    padding: 16px;\n    overflow-y: auto;\n    background: #f8fafb;\n    scrollbar-width: thin;\n    scrollbar-color: #cbd5e1 transparent;\n    min-height: 300px;\n}\n\n#ai-chat-body::-webkit-scrollbar {\n    width: 6px;\n}\n\n#ai-chat-body::-webkit-scrollbar-track {\n    background: transparent;\n}\n\n#ai-chat-body::-webkit-scrollbar-thumb {\n    background: #cbd5e1;\n    border-radius: 3px;\n}\n\n#ai-chat-body::-webkit-scrollbar-thumb:hover {\n    background: #94a3b8;\n}\n\n#ai-chat-body.dark {\n    background: #1f2937;\n    color: #f3f4f6;\n}\n\n.ai-msg {\n    max-width: 85%;\n    padding: 12px 16px;\n    border-radius: 14px;\n    margin: 10px 0;\n    word-wrap: break-word;\n    line-height: 1.5;\n    font-size: 14px;\n    animation: fadeIn 0.3s ease-in;\n}\n\n@keyframes fadeIn {\n    from {\n        opacity: 0;\n        transform: translateY(10px);\n    }\n    to {\n        opacity: 1;\n        transform: translateY(0);\n    }\n}\n\n.ai-msg.user {\n    background: linear-gradient(135deg, var(--ai-accent) 0%, var(--ai-accent-2) 100%);\n    color: white;\n    margin-left: auto;\n    border-bottom-right-radius: 4px;\n    box-shadow: 0 2px 8px var(--ai-accent-shadow-weak);\n}\n\n.ai-msg.bot {\n    background: #e8eef7;\n    color: #1f2937;\n    margin-right: auto;\n    border-bottom-left-radius: 4px;\n    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);\n}\n\n.ai-msg strong {\n    font-weight: 600;\n    color: inherit;\n}\n\n.ai-msg.user strong {\n    color: #ffffff;\n}\n\n.ai-msg.bot.dark {\n    background: #374151;\n    color: #f3f4f6;\n}\n\n#ai-chat-footer {\n    display: flex;\n    gap: 8px;\n    padding: 12px 16px;\n    border-top: 1px solid #e2e8f0;\n    background: #fff;\n}\n\n#ai-chat-footer.dark {\n    background: #111827;\n    border-top: 1px solid #374151;\n}\n\n#ai-chat-footer input {\n    flex: 1;\n    padding: 11px 14px;\n    border-radius: 8px;\n    border: 1px solid #e2e8f0;\n    background: #f8fafb;\n    font-size: 14px;\n    transition: all 0.2s ease;\n}\n\n#ai-chat-footer input:focus {\n    outline: none;\n    border-color: var(--ai-accent);\n    background: #fff;\n    box-shadow: 0 0 0 3px var(--ai-accent-focus);\n}\n\n#ai-chat-footer input.dark {\n    border: 1px solid #374151;\n    background: #1f2937;\n    color: #f3f4f6;\n}\n\n#ai-chat-footer button {\n    padding: 11px 16px;\n    border: none;\n    border-radius: 8px;\n    cursor: pointer;\n    background: linear-gradient(135deg, var(--ai-accent) 0%, var(--ai-accent-2) 100%);\n    color: white;\n    font-weight: 500;\n    font-size: 13px;\n    transition: all 0.2s ease;\n    min-width: 60px;\n}\n\n#ai-chat-footer button:hover {\n    box-shadow: 0 4px 12px var(--ai-accent-shadow);\n    transform: translateY(-2px);\n}\n\n#ai-chat-footer button:active {\n    transform: translateY(0);\n}\n\n#ai-chat-footer button.dark {\n    background: #2563eb;\n}\n\n/* Mode toggle (moon) button in header */\n#ai-mode-toggle {\n    background: transparent;\n    border: none;\n    color: inherit;\n    font-size: 16px;\n    padding: 6px;\n    border-radius: 8px;\n    cursor: pointer;\n    transition: background 0.15s ease, transform 0.08s ease;\n}\n\n#ai-mode-toggle:hover {\n    background: rgba(var(--ai-accent-rgb), 0.08);\n    transform: translateY(-1px);\n}\n\n#ai-mode-toggle:active {\n    transform: translateY(0);\n}\n\n#ai-mode-toggle:focus {\n    outline: none;\n    box-shadow: 0 0 0 3px var(--ai-accent-focus);\n}\n\n/* Dark header hover fallback */\n#ai-chat-header.dark #ai-mode-toggle:hover {\n    background: rgba(255,255,255,0.06);\n}\n\n/* Notification popup for new messages when chat is hidden */\n#ai-chat-notification {\n    position: fixed;\n    bottom: 100px;\n    right: 25px;\n    background: rgba(var(--ai-accent-rgb), 0.98);\n    color: white;\n    padding: 12px 16px;\n    border-radius: 12px;\n    box-shadow: 0 10px 30px var(--ai-accent-shadow);\n    z-index: 9998;\n    max-width: 320px;\n    font-size: 14px;\n    cursor: pointer;\n    transition: all 0.3s ease;\n    animation: slideInUp 0.3s ease-out;\n}\n\n#ai-chat-notification:hover {\n    transform: translateY(-3px);\n    box-shadow: 0 14px 40px var(--ai-accent-shadow);\n}\n\n#ai-chat-notification strong {\n    display: block;\n    margin-bottom: 4px;\n    font-weight: 600;\n}\n\n#ai-chat-notification p {\n    margin: 0;\n    opacity: 0.95;\n    line-height: 1.4;\n}\n\n@keyframes slideInUp {\n    from {\n        opacity: 0;\n        transform: translateY(20px);\n    }\n    to {\n        opacity: 1;\n        transform: translateY(0);\n    }\n}\n\n/* Typing indicator dots animation */\n.typing-dots {\n    display: inline-flex;\n    gap: 4px;\n    align-items: center;\n    margin-left: 4px;\n}\n\n.typing-dots span {\n    display: inline-block;\n    width: 8px;\n    height: 8px;\n    border-radius: 50%;\n    background: currentColor;\n    opacity: 0.4;\n    animation: typing 1.4s infinite;\n}\n\n.typing-dots span:nth-child(2) {\n    animation-delay: 0.2s;\n}\n\n.typing-dots span:nth-child(3) {\n    animation-delay: 0.4s;\n}\n\n@keyframes typing {\n    0%, 60%, 100% {\n        opacity: 0.4;\n        transform: translateY(0);\n    }\n    30% {\n        opacity: 1;\n        transform: translateY(-8px);\n    }\n}\n";
 
-// Turn data-* attributes into config keys (data-powered -> poweredBy, data-api -> apiUrl)
+// Turn data-* attributes into config keys (data-powered -> poweredBy, data-powered-url -> poweredByUrl, data-api -> apiUrl)
 function configFromDataset(ds) {
     const out = {};
     if (!ds) return out;
@@ -58,6 +60,7 @@ function configFromDataset(ds) {
         if (ds[k]) out[k] = ds[k];
     });
     if (ds.powered) out.poweredBy = ds.powered;
+    if (ds.poweredUrl) out.poweredByUrl = ds.poweredUrl;
     if (ds.api) out.apiUrl = ds.api;
     return out;
 }
@@ -99,16 +102,31 @@ function aiChatInit(userConfig) {
     const COLOR = cfg.color || "#0d6efd";
     const ICON = cfg.icon || "";
     const POWERED = cfg.poweredBy || "";
+    // Only allow http(s) links for "Powered by"
+    const POWERED_URL = /^https?:\/\//i.test(cfg.poweredByUrl || "") ? cfg.poweredByUrl.replace(/"/g, "&quot;") : "";
     const PROMPT = cfg.prompt || "";
     const API_URL = cfg.apiUrl || "";
 
-    // Per-visitor session id so the bot remembers the conversation
-    let SESSION_ID = "";
-    try { SESSION_ID = sessionStorage.getItem("ai-chat-session") || ""; } catch (e) {}
+    // Cookie helpers
+    function getCookie(name) {
+        try {
+            const m = document.cookie.match(new RegExp("(?:^|; )" + name + "=([^;]*)"));
+            return m ? decodeURIComponent(m[1]) : "";
+        } catch (e) { return ""; }
+    }
+    function setCookie(name, value, days) {
+        try {
+            const exp = new Date(Date.now() + days * 864e5).toUTCString();
+            document.cookie = name + "=" + encodeURIComponent(value) + "; expires=" + exp + "; path=/; SameSite=Lax";
+        } catch (e) {}
+    }
+
+    // Per-visitor session id (cookie, 30 days) so the bot remembers the conversation after reload
+    let SESSION_ID = getCookie("ai_chat_sid");
     if (!SESSION_ID) {
         SESSION_ID = Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
-        try { sessionStorage.setItem("ai-chat-session", SESSION_ID); } catch (e) {}
     }
+    setCookie("ai_chat_sid", SESSION_ID, 30);
 
     function buildPayload(text) {
         return JSON.stringify({
@@ -138,17 +156,32 @@ ${PROMPT}`,
     ];
     
     let userIP = "unknown";
-    
-    // Fetch user IP
-    fetch('https://api.ipify.org?format=json')
-        .then(res => res.json())
-        .then(data => {
-            userIP = data.ip;
-            console.log("User IP detected:", userIP);
-        })
-        .catch(err => {
-            console.log("Could not fetch IP:", err);
-        });
+
+    // Fetch user IP (gives up after 3s so the chat history still loads)
+    const ipReady = Promise.race([
+        fetch('https://api.ipify.org?format=json')
+            .then(res => res.json())
+            .then(data => {
+                userIP = data.ip || "unknown";
+                console.log("User IP detected:", userIP);
+            })
+            .catch(err => {
+                console.log("Could not fetch IP:", err);
+            }),
+        new Promise(resolve => setTimeout(resolve, 3000))
+    ]);
+
+    // Chat history: saved per website + visitor IP so it survives a page reload
+    const HISTORY_LIMIT = 50;
+    function historyKey() {
+        return "ai_chat_history:" + DOMAIN + ":" + userIP;
+    }
+    function loadHistory() {
+        try { return JSON.parse(localStorage.getItem(historyKey()) || "[]"); } catch (e) { return []; }
+    }
+    function saveHistory(list) {
+        try { localStorage.setItem(historyKey(), JSON.stringify(list.slice(-HISTORY_LIMIT))); } catch (e) {}
+    }
 
     function getRandomGreeting() {
         return greetings[Math.floor(Math.random() * greetings.length)];
@@ -346,10 +379,10 @@ ${PROMPT}`,
         </div>
         <div id="ai-chat-body"> <div id="ai-agent-profile-card" style="display: flex; flex-direction: column; align-items: center; padding: 24px 0 12px 0;">
             <div style="width: 64px; height: 64px; border-radius: 50%; background: var(--ai-accent-focus); display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
-                ${ICON ? `<img src="${ICON}" alt="${AGENT}" style="width: 40px; height: 40px; border-radius: 50%;">` : '🤖'}
+                ${ICON ? `<img src="${ICON}" alt="${AGENT}" style="width: 52px; height: 52px; border-radius: 50%; object-fit: cover;">` : '<span style="font-size: 38px; line-height: 1;">🤖</span>'}
             </div>
             <div style="font-weight: bold; font-size: 1.1em; margin-bottom: 4px; color: var(--ai-accent);">${AGENT}</div>
-            ${POWERED ? `<div style="font-size: 0.95em; color: #888;">Powered by ${POWERED}</div>` : ''}
+            ${POWERED ? `<div style="font-size: 0.95em; color: #888;">Powered by ${POWERED_URL ? `<a href="${POWERED_URL}" target="_blank" rel="noopener" style="color: var(--ai-accent); font-weight: 600; text-decoration: none;">${POWERED}</a>` : POWERED}</div>` : ''}
         </div></div>
         <div id="ai-chat-footer">
             <input type="text" id="ai-chat-input" placeholder="Ask anything...">
@@ -388,8 +421,42 @@ ${PROMPT}`,
         document.getElementById("ai-chat-header").classList.toggle("dark");
     };
 
+    // Messages shown in this page view; merged into saved history once it has loaded
+    let chatHistory = [];
+    let historyLoaded = false;
+
+    function rememberMessage(text, sender) {
+        // Don't keep error/status messages
+        if (text.startsWith("❌") || text === "Server Error Retry") return;
+        chatHistory.push({ text: text, sender: sender });
+        if (historyLoaded) saveHistory(chatHistory);
+    }
+
+    // Restore earlier messages after a reload
+    ipReady.then(() => {
+        const saved = loadHistory();
+        const newThisPage = chatHistory;
+        const firstNew = chatBody.querySelector(".ai-msg");
+        saved.forEach(m => {
+            const el = renderMessage(m.text, m.sender, false);
+            chatBody.insertBefore(el, firstNew);
+        });
+        chatHistory = saved.concat(newThisPage);
+        historyLoaded = true;
+        saveHistory(chatHistory);
+        chatBody.scrollTop = chatBody.scrollHeight;
+    });
+
     // Append message with optional typing animation
     function appendMessage(text, sender, isTyping = false) {
+        const div = renderMessage(text, sender, isTyping);
+        chatBody.appendChild(div);
+        chatBody.scrollTop = chatBody.scrollHeight;
+        if (!isTyping) rememberMessage(text, sender);
+        return div;
+    }
+
+    function renderMessage(text, sender, isTyping) {
         const div = document.createElement("div");
         div.className = "ai-msg " + sender;
         if (isTyping) {
@@ -407,8 +474,6 @@ ${PROMPT}`,
             // Add typing animation dots
             div.innerHTML += '<span class="typing-dots"><span></span><span></span><span></span></span>';
         }
-        chatBody.appendChild(div);
-        chatBody.scrollTop = chatBody.scrollHeight;
         return div;
     }
 
