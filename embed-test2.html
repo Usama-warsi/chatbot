@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Embed Test - Init Function</title>
+</head>
+<body>
+    <h1>Tareeqa 2: AIChat.init() function</h1>
+    <p>Script load hoti hai, phir page khud function se chatbot start karta hai.</p>
+
+    <script src="chatbot.js?v=2" data-auto="false"></script>
+    <script>
+        AIChat.init({
+            agent: "Eric",
+            color: "#7c3aed",
+            poweredBy: "Another Website",
+            prompt: "You are a friendly assistant for this website. Help visitors with their questions about our services."
+        });
+    </script>
+</body>
+</html>

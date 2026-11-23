@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Site Assistant - Chatbot</title>
+    <link rel="stylesheet" href="chat.css?v=3">
+</head>
+<body>
+
+    <!-- AI Chatbot Widget
+         Every data-* attribute is optional; leave one out to use the value in CHAT_CONFIG (top of chat.js).
+         data-prompt = text prompt for this website
+         data-api    = optional API URL with this website's data (packages/products/prices) -->
+    <div id="ai-chat-widget"
+         data-backend="https://automation.codrammer.com/webhook/chat-widget"
+         data-color="#FF4001"
+         data-agent="Eric"
+         data-domain=""
+         data-powered=""
+         data-prompt="You are a friendly assistant for this website. Help visitors with their questions about our services."
+         data-api="">
+    </div>
+
+    <script src="chat.js?v=3"></script>
+</body>
+</html>
