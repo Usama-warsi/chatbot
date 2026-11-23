@@ -50,6 +50,37 @@ const CHAT_CONFIG = {
 };
 // ====================================================
 
+const AI_CHAT_RESET = `
+:host {
+    all: initial;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-size: 14px;
+    line-height: 1.4;
+    color: #1f2937;
+}
+*, *::before, *::after { box-sizing: border-box; }
+button, input {
+    font-family: inherit;
+    font-size: inherit;
+    line-height: normal;
+    margin: 0;
+    width: auto;
+    height: auto;
+    max-width: none;
+    text-transform: none;
+    letter-spacing: normal;
+    text-indent: 0;
+    text-shadow: none;
+    -webkit-appearance: none;
+    appearance: none;
+}
+img { max-width: none; display: inline-block; }
+p { margin: 0; }
+#ai-chat-footer input { min-width: 0; color: #1f2937; }
+#ai-chat-footer button { flex: 0 0 auto; }
+#ai-chat-header { line-height: 1.2; }
+`;
+
 const AI_CHAT_CSS = "#ai-chat-toggle {\n    position: fixed;\n    bottom: 25px;\n    right: 25px;\n    background: linear-gradient(135deg, var(--ai-accent) 0%, var(--ai-accent-2) 100%);\n    color: white;\n    border-radius: 50%;\n    width: 70px;\n    height: 70px;\n    border: none;\n    cursor: pointer;\n    font-size: 28px;\n    display: flex;\n    align-items: center;\n    justify-content: center;\n    z-index: 9999;\n    box-shadow: 0 8px 24px var(--ai-accent-shadow);\n    transition: all 0.3s ease;\n    transform: scale(1);\n    padding:10px;\n}\n\n#ai-chat-toggle:hover {\n    transform: scale(1.1);\n    box-shadow: 0 12px 32px var(--ai-accent-shadow);\n}\n\n#ai-chat-toggle:active {\n    transform: scale(0.95);\n}\n\n/* Small badge shown when chat is hidden */\n#ai-chat-badge {\n    position: fixed;\n    bottom: 100px;\n    right: 25px;\n    background: rgba(var(--ai-accent-rgb), 0.96);\n    color: white;\n    border: none;\n    padding: 8px 12px;\n    border-radius: 999px;\n    box-shadow: 0 8px 24px var(--ai-accent-shadow);\n    font-size: 13px;\n    cursor: pointer;\n    z-index: 9998;\n    display: flex;\n    align-items: center;\n    gap: 8px;\n    transition: opacity 0.5s ease, transform 0.5s ease;\n    opacity: 0;\n    pointer-events: none;\n}\n\n#ai-chat-badge.visible {\n    opacity: 1;\n    pointer-events: auto;\n    animation: badgePulse 0.5s ease-out;\n}\n\n#ai-chat-badge:hover {\n    transform: translateY(-3px);\n    box-shadow: 0 12px 32px var(--ai-accent-shadow);\n}\n\n#ai-chat-badge:focus {\n    outline: none;\n    box-shadow: 0 0 0 4px var(--ai-accent-focus);\n}\n\n@keyframes badgePulse {\n    0% {\n        opacity: 0;\n        transform: scale(0.8) translateY(10px);\n    }\n    100% {\n        opacity: 1;\n        transform: scale(1) translateY(0);\n    }\n}\n\n#ai-chat-container {\n    position: fixed;\n    bottom: 90px;\n    right: 25px;\n    width: 380px;\n    max-height: 600px;\n    background: #fff;\n    border-radius: 16px;\n    box-shadow: 0 20px 60px rgba(0,0,0,0.15);\n    display: flex;\n    flex-direction: column;\n    overflow: hidden;\n    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;\n    z-index: 9999;\n    display: none;\n    animation: slideUp 0.3s ease-out;\n}\n\n@keyframes slideUp {\n    from {\n        opacity: 0;\n        transform: translateY(20px);\n    }\n    to {\n        opacity: 1;\n        transform: translateY(0);\n    }\n}\n\n#ai-chat-container.dark {\n    background: #1f2937;\n    color: #f3f4f6;\n}\n\n#ai-chat-header {\n    padding: 16px;\n    background: linear-gradient(135deg, var(--ai-accent) 0%, var(--ai-accent-2) 100%);\n    color: white;\n    font-weight: 600;\n    cursor: grab;\n    display: flex;\n    justify-content: space-between;\n    align-items: center;\n    font-size: 15px;\n    letter-spacing: 0.3px;\n}\n\n#ai-chat-header.dark {\n    background: #111827;\n    color: #f3f4f6;\n}\n\n#ai-chat-body {\n    flex: 1;\n    padding: 16px;\n    overflow-y: auto;\n    background: #f8fafb;\n    scrollbar-width: thin;\n    scrollbar-color: #cbd5e1 transparent;\n    min-height: 300px;\n}\n\n#ai-chat-body::-webkit-scrollbar {\n    width: 6px;\n}\n\n#ai-chat-body::-webkit-scrollbar-track {\n    background: transparent;\n}\n\n#ai-chat-body::-webkit-scrollbar-thumb {\n    background: #cbd5e1;\n    border-radius: 3px;\n}\n\n#ai-chat-body::-webkit-scrollbar-thumb:hover {\n    background: #94a3b8;\n}\n\n#ai-chat-body.dark {\n    background: #1f2937;\n    color: #f3f4f6;\n}\n\n.ai-msg {\n    max-width: 85%;\n    padding: 12px 16px;\n    border-radius: 14px;\n    margin: 10px 0;\n    word-wrap: break-word;\n    line-height: 1.5;\n    font-size: 14px;\n    animation: fadeIn 0.3s ease-in;\n}\n\n@keyframes fadeIn {\n    from {\n        opacity: 0;\n        transform: translateY(10px);\n    }\n    to {\n        opacity: 1;\n        transform: translateY(0);\n    }\n}\n\n.ai-msg.user {\n    background: linear-gradient(135deg, var(--ai-accent) 0%, var(--ai-accent-2) 100%);\n    color: white;\n    margin-left: auto;\n    border-bottom-right-radius: 4px;\n    box-shadow: 0 2px 8px var(--ai-accent-shadow-weak);\n}\n\n.ai-msg.bot {\n    background: #e8eef7;\n    color: #1f2937;\n    margin-right: auto;\n    border-bottom-left-radius: 4px;\n    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);\n}\n\n.ai-msg strong {\n    font-weight: 600;\n    color: inherit;\n}\n\n.ai-msg.user strong {\n    color: #ffffff;\n}\n\n.ai-msg.bot.dark {\n    background: #374151;\n    color: #f3f4f6;\n}\n\n#ai-chat-footer {\n    display: flex;\n    gap: 8px;\n    padding: 12px 16px;\n    border-top: 1px solid #e2e8f0;\n    background: #fff;\n}\n\n#ai-chat-footer.dark {\n    background: #111827;\n    border-top: 1px solid #374151;\n}\n\n#ai-chat-footer input {\n    flex: 1;\n    padding: 11px 14px;\n    border-radius: 8px;\n    border: 1px solid #e2e8f0;\n    background: #f8fafb;\n    font-size: 14px;\n    transition: all 0.2s ease;\n}\n\n#ai-chat-footer input:focus {\n    outline: none;\n    border-color: var(--ai-accent);\n    background: #fff;\n    box-shadow: 0 0 0 3px var(--ai-accent-focus);\n}\n\n#ai-chat-footer input.dark {\n    border: 1px solid #374151;\n    background: #1f2937;\n    color: #f3f4f6;\n}\n\n#ai-chat-footer button {\n    padding: 11px 16px;\n    border: none;\n    border-radius: 8px;\n    cursor: pointer;\n    background: linear-gradient(135deg, var(--ai-accent) 0%, var(--ai-accent-2) 100%);\n    color: white;\n    font-weight: 500;\n    font-size: 13px;\n    transition: all 0.2s ease;\n    min-width: 60px;\n}\n\n#ai-chat-footer button:hover {\n    box-shadow: 0 4px 12px var(--ai-accent-shadow);\n    transform: translateY(-2px);\n}\n\n#ai-chat-footer button:active {\n    transform: translateY(0);\n}\n\n#ai-chat-footer button.dark {\n    background: #2563eb;\n}\n\n/* Mode toggle (moon) button in header */\n#ai-mode-toggle {\n    background: transparent;\n    border: none;\n    color: inherit;\n    font-size: 16px;\n    padding: 6px;\n    border-radius: 8px;\n    cursor: pointer;\n    transition: background 0.15s ease, transform 0.08s ease;\n}\n\n#ai-mode-toggle:hover {\n    background: rgba(var(--ai-accent-rgb), 0.08);\n    transform: translateY(-1px);\n}\n\n#ai-mode-toggle:active {\n    transform: translateY(0);\n}\n\n#ai-mode-toggle:focus {\n    outline: none;\n    box-shadow: 0 0 0 3px var(--ai-accent-focus);\n}\n\n/* Dark header hover fallback */\n#ai-chat-header.dark #ai-mode-toggle:hover {\n    background: rgba(255,255,255,0.06);\n}\n\n/* Notification popup for new messages when chat is hidden */\n#ai-chat-notification {\n    position: fixed;\n    bottom: 100px;\n    right: 25px;\n    background: rgba(var(--ai-accent-rgb), 0.98);\n    color: white;\n    padding: 12px 16px;\n    border-radius: 12px;\n    box-shadow: 0 10px 30px var(--ai-accent-shadow);\n    z-index: 9998;\n    max-width: 320px;\n    font-size: 14px;\n    cursor: pointer;\n    transition: all 0.3s ease;\n    animation: slideInUp 0.3s ease-out;\n}\n\n#ai-chat-notification:hover {\n    transform: translateY(-3px);\n    box-shadow: 0 14px 40px var(--ai-accent-shadow);\n}\n\n#ai-chat-notification strong {\n    display: block;\n    margin-bottom: 4px;\n    font-weight: 600;\n}\n\n#ai-chat-notification p {\n    margin: 0;\n    opacity: 0.95;\n    line-height: 1.4;\n}\n\n@keyframes slideInUp {\n    from {\n        opacity: 0;\n        transform: translateY(20px);\n    }\n    to {\n        opacity: 1;\n        transform: translateY(0);\n    }\n}\n\n/* Typing indicator dots animation */\n.typing-dots {\n    display: inline-flex;\n    gap: 4px;\n    align-items: center;\n    margin-left: 4px;\n}\n\n.typing-dots span {\n    display: inline-block;\n    width: 8px;\n    height: 8px;\n    border-radius: 50%;\n    background: currentColor;\n    opacity: 0.4;\n    animation: typing 1.4s infinite;\n}\n\n.typing-dots span:nth-child(2) {\n    animation-delay: 0.2s;\n}\n\n.typing-dots span:nth-child(3) {\n    animation-delay: 0.4s;\n}\n\n@keyframes typing {\n    0%, 60%, 100% {\n        opacity: 0.4;\n        transform: translateY(0);\n    }\n    30% {\n        opacity: 1;\n        transform: translateY(-8px);\n    }\n}\n";
 
 // Turn data-* attributes into config keys (data-powered -> poweredBy, data-powered-url -> poweredByUrl, data-api -> apiUrl)
@@ -78,13 +109,17 @@ function aiChatInit(userConfig) {
     if (window.__aiChatLoaded) return;
     window.__aiChatLoaded = true;
 
-    // Inject widget CSS once
-    if (!document.getElementById("ai-chat-style")) {
-        const style = document.createElement("style");
-        style.id = "ai-chat-style";
-        style.textContent = AI_CHAT_CSS;
-        document.head.appendChild(style);
-    }
+    // The widget lives inside a Shadow DOM so the website's CSS can't break it
+    // (and the widget's CSS can't touch the website).
+    const host = document.createElement("ai-chat-root");
+    host.style.cssText = "all: initial !important; display: block !important;";
+    document.body.appendChild(host);
+    const root = host.attachShadow ? host.attachShadow({ mode: "open" }) : host;
+    const $ = id => root.querySelector("#" + id);
+
+    const style = document.createElement("style");
+    style.textContent = AI_CHAT_RESET + AI_CHAT_CSS;
+    root.appendChild(style);
 
     // Config priority (later wins):
     // defaults < window.AIChatConfig < <script data-*> < <div id="ai-chat-widget" data-*> < AIChat.init({...})
@@ -262,15 +297,15 @@ ${PROMPT}`,
     const accent = COLOR;
     const accent2 = darkenHex(accent, 0.12);
     const { r, g, b } = hexToRgb(accent);
-    document.documentElement.style.setProperty('--ai-accent', accent);
-    document.documentElement.style.setProperty('--ai-accent-2', accent2);
-    document.documentElement.style.setProperty('--ai-accent-rgb', `${r}, ${g}, ${b}`);
-    document.documentElement.style.setProperty('--ai-accent-shadow', `rgba(${r}, ${g}, ${b}, 0.4)`);
-    document.documentElement.style.setProperty('--ai-accent-shadow-weak', `rgba(${r}, ${g}, ${b}, 0.18)`);
-    document.documentElement.style.setProperty('--ai-accent-focus', `rgba(${r}, ${g}, ${b}, 0.12)`);
+    host.style.setProperty('--ai-accent', accent);
+    host.style.setProperty('--ai-accent-2', accent2);
+    host.style.setProperty('--ai-accent-rgb', `${r}, ${g}, ${b}`);
+    host.style.setProperty('--ai-accent-shadow', `rgba(${r}, ${g}, ${b}, 0.4)`);
+    host.style.setProperty('--ai-accent-shadow-weak', `rgba(${r}, ${g}, ${b}, 0.18)`);
+    host.style.setProperty('--ai-accent-focus', `rgba(${r}, ${g}, ${b}, 0.12)`);
 
     toggleBtn.style.background = `linear-gradient(135deg, var(--ai-accent) 0%, var(--ai-accent-2) 100%)`;
-    document.body.appendChild(toggleBtn);
+    root.appendChild(toggleBtn);
 
     // Create a small badge that shows when the chat is hidden
     const badge = document.createElement('button');
@@ -280,7 +315,7 @@ ${PROMPT}`,
     const badgeIcon = ICON ? `<img src="${ICON}" alt="${AGENT}" style="width: 18px; height: 18px;">` : '🤖';
     badge.innerHTML = `${badgeIcon} <span>${AGENT} is here to help</span>`;
     badge.style.display = 'block';  // Visible by default, but only shown with .visible
-    document.body.appendChild(badge);
+    root.appendChild(badge);
 
     // Create notification popup for new messages when chat is hidden
     const notification = document.createElement('div');
@@ -296,7 +331,7 @@ ${PROMPT}`,
             </div>
         </div>
     `;
-    document.body.appendChild(notification);
+    root.appendChild(notification);
 
     let badgeTimerInterval = null;
     let badgeHideTimeout = null;
@@ -389,12 +424,12 @@ ${PROMPT}`,
             <button id="ai-send-btn">Send</button>
         </div>
     `;
-    document.body.appendChild(chatContainer);
+    root.appendChild(chatContainer);
 
-    const chatBody = document.getElementById("ai-chat-body");
-    const chatInput = document.getElementById("ai-chat-input");
-    const sendBtn = document.getElementById("ai-send-btn");
-    const modeToggle = document.getElementById("ai-mode-toggle");
+    const chatBody = $("ai-chat-body");
+    const chatInput = $("ai-chat-input");
+    const sendBtn = $("ai-send-btn");
+    const modeToggle = $("ai-mode-toggle");
 
     // Toggle chat open/close
     toggleBtn.onclick = () => {
@@ -417,8 +452,8 @@ ${PROMPT}`,
         chatContainer.classList.toggle("dark");
         chatBody.classList.toggle("dark");
         chatInput.classList.toggle("dark");
-        document.getElementById("ai-chat-footer").classList.toggle("dark");
-        document.getElementById("ai-chat-header").classList.toggle("dark");
+        $("ai-chat-footer").classList.toggle("dark");
+        $("ai-chat-header").classList.toggle("dark");
     };
 
     // Messages shown in this page view; merged into saved history once it has loaded
@@ -621,7 +656,7 @@ ${PROMPT}`,
                         hasUnreadMessage = true;
                         badge.classList.remove('visible');  // Hide badge when message arrives
                         const preview = reply.replace(/<br>/g, ' ').substring(0, 60);
-                        document.getElementById('ai-notif-text').innerHTML = preview + (reply.length > 60 ? '...' : '');
+                        $('ai-notif-text').innerHTML = preview + (reply.length > 60 ? '...' : '');
                         notification.style.display = 'block';
                     }
                 }

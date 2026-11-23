@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hostile CSS Test</title>
+    <style>
+        /* Aggressive site styles that used to break the widget */
+        * { font-family: Georgia, serif !important; line-height: 3 !important; letter-spacing: 2px; }
+        body { font-size: 22px; color: red; background: #222; }
+        div { padding: 20px !important; border: 2px dashed yellow; }
+        button { width: 100% !important; padding: 30px !important; background: red !important; text-transform: uppercase; display: block !important; }
+        input { width: 100% !important; height: 80px !important; border: 5px solid lime !important; }
+        img, svg { width: 300px !important; }
+        p { margin: 40px !important; }
+    </style>
+</head>
+<body>
+    <h1>Hostile CSS page</h1>
+    <p>Is page par har button/input/div par zabardasti CSS lagi hai.</p>
+    <button>Site ka apna button</button>
+
+    <script src="chatbot.js" data-auto="false"></script>
+    <script>
+        AIChat.init({
+            agent: "Eric",
+            color: "#0ea5e9",
+            poweredBy: "codrammer.com",
+            poweredByUrl: "https://codrammer.com",
+            prompt: "You are a friendly assistant for this website."
+        });
+    </script>
+</body>
+</html>
