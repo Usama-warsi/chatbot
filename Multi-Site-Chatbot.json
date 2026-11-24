@@ -91,7 +91,7 @@
       "typeVersion": 4.2,
       "position": [620, 160],
       "parameters": {
-        "toolDescription": "Fetch this website's live data (products, packages, prices, services, features) from the website's own API. Only use when the system message says a data API is configured.",
+        "toolDescription": "Fetch this website's live content from its own data feed or API (JSON or RSS/XML). It can contain blog posts, articles, news, products, packages, prices, services or any other information about the website. Call this tool for ANY question about the website's content, posts, offers, services or updates, then answer only from what it returns. Only use when the system message says a data API is configured.",
         "url": "={{ $('Chatbot Webhook').item.json.body.apiUrl }}",
         "options": {}
       }

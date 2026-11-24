@@ -12,7 +12,10 @@
  *       poweredBy: "",   // optional: "Powered by ..." text
  *       poweredByUrl: "", // optional: link for the "Powered by" text
  *       domain: "",      // optional: defaults to the current site
- *       backend: ""      // optional: n8n webhook URL
+ *       backend: "",     // optional: n8n webhook URL
+ *       timeout: 180,    // optional: seconds to wait for a reply
+ *       greeting: "",    // optional: first bot message ({agent} = bot name)
+ *       autoOpen: true   // optional: open the chat on a visitor's first visit
  *     };
  *   </script>
  *   <script src="https://YOUR-CDN/chatbot.js"></script>
@@ -46,7 +49,13 @@ const CHAT_CONFIG = {
     // Text prompt: tell the bot who it is and what it knows about this website
     prompt: "You are a friendly assistant for this website. Help visitors with their questions about our services.",
     // Optional: API URL that returns this website's data (packages, products, prices...). Leave "" if none.
-    apiUrl: ""
+    apiUrl: "",
+    // Seconds to wait for a reply (raise it for slow self-hosted models like Ollama)
+    timeout: 180,
+    // First message from the bot ({agent} = bot name)
+    greeting: "Hi! 👋 I'm {agent}. How can I help you today?",
+    // Open the chat by itself on a visitor's first visit
+    autoOpen: true
 };
 // ====================================================
 
@@ -93,6 +102,9 @@ function configFromDataset(ds) {
     if (ds.powered) out.poweredBy = ds.powered;
     if (ds.poweredUrl) out.poweredByUrl = ds.poweredUrl;
     if (ds.api) out.apiUrl = ds.api;
+    if (ds.timeout) out.timeout = ds.timeout;
+    if (ds.greeting) out.greeting = ds.greeting;
+    if (ds.autoOpen) out.autoOpen = ds.autoOpen;
     return out;
 }
 
@@ -141,6 +153,7 @@ function aiChatInit(userConfig) {
     const POWERED_URL = /^https?:\/\//i.test(cfg.poweredByUrl || "") ? cfg.poweredByUrl.replace(/"/g, "&quot;") : "";
     const PROMPT = cfg.prompt || "";
     const API_URL = cfg.apiUrl || "";
+    const TIMEOUT_MS = (parseInt(cfg.timeout, 10) || 180) * 1000;
 
     // Cookie helpers
     function getCookie(name) {
@@ -176,19 +189,10 @@ ${PROMPT}`,
         });
     }
     
-    // Random greeting messages
-    const greetings = [
-        `Hi! 👋 I'm ${AGENT}, your friendly guide to making ${DOMAIN} rank higher and perform better let's optimize it together!`,
-        `Hello there! 🌟 I'm your ${AGENT}. Let's dig into ${DOMAIN} and turn those SEO issues into wins!`,
-        `Hey! 😎 ${AGENT} here, ready to help ${DOMAIN} climb the search rankings and shine online!`,
-        `Greetings! 👋 I'm your ${AGENT}. Let's uncover any SEO problems on ${DOMAIN} and make your site unstoppable!`,
-        `Hi! ✨ I'm ${AGENT}, here to help ${DOMAIN} look amazing in search results let's get started!`,
-        `Hey there! 🚀 I'm your ${AGENT}. Ready to boost ${DOMAIN}'s SEO score and visibility let's go!`,
-        `Hello! 👋 ${AGENT} at your service. Let's fix, optimize, and supercharge ${DOMAIN} together!`,
-        `Hi there! 😃 I'm your ${AGENT}. Let's analyze ${DOMAIN} and turn insights into action!`,
-        `Hey! 🌟 I'm ${AGENT}, your guide to a faster, smarter, and more search-friendly ${DOMAIN}!`,
-        `Hello! 👋 Ready to make ${DOMAIN} shine? I'm your ${AGENT} let's tackle those SEO issues together!`
-    ];
+    // Greeting shown to a visitor with no chat yet ({agent} is replaced with the bot name)
+    const GREETING = String(cfg.greeting || "Hi! 👋 I'm {agent}. How can I help you today?").replace(/\{agent\}/g, AGENT);
+    // Open the chat by itself on the visitor's first visit to this website
+    const AUTO_OPEN = cfg.autoOpen !== false && cfg.autoOpen !== "false";
     
     let userIP = "unknown";
 
@@ -218,9 +222,7 @@ ${PROMPT}`,
         try { localStorage.setItem(historyKey(), JSON.stringify(list.slice(-HISTORY_LIMIT))); } catch (e) {}
     }
 
-    function getRandomGreeting() {
-        return greetings[Math.floor(Math.random() * greetings.length)];
-    }
+
     // helper: convert hex to rgb
     function hexToRgb(hex) {
         if (!hex) return { r: 13, g: 110, b: 253 };
@@ -436,13 +438,6 @@ ${PROMPT}`,
         const isOpening = chatContainer.style.display !== "flex";
         chatContainer.style.display = isOpening ? "flex" : "none";
         
-        if (isOpening) {
-            // Chat is opening - show greeting if chat body is empty
-            // if (chatBody.children.length === 0) {
-            //     appendMessage(getRandomGreeting(), "bot");
-            // }
-        }
-        
         updateBadgeVisibility();
         notification.style.display = 'none';
     };
@@ -480,6 +475,20 @@ ${PROMPT}`,
         historyLoaded = true;
         saveHistory(chatHistory);
         chatBody.scrollTop = chatBody.scrollHeight;
+
+        // No chat yet: greet the visitor. On the first visit (no cookie) also open the chat.
+        if (chatHistory.length === 0) {
+            const firstVisit = !getCookie("ai_chat_greeted");
+            setCookie("ai_chat_greeted", "1", 30);
+            setTimeout(() => {
+                if (firstVisit && AUTO_OPEN && chatContainer.style.display !== "flex") {
+                    chatContainer.style.display = "flex";
+                    notification.style.display = "none";
+                    updateBadgeVisibility();
+                }
+                if (chatHistory.length === 0) appendMessage(GREETING, "bot");
+            }, 1000);
+        }
     });
 
     // Append message with optional typing animation
@@ -502,6 +511,7 @@ ${PROMPT}`,
         }
         // Convert markdown bold to HTML and preserve line breaks
         const formatted = text
+            .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)"]+)\)/g, '<a href="$2" target="_blank" rel="noopener" style="color: inherit; text-decoration: underline;">$1</a>')  // [text](link)
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')  // Bold text
             .replace(/\n/g, "<br>");
         div.innerHTML = formatted;
@@ -525,14 +535,14 @@ ${PROMPT}`,
 
         // Increase timeout since n8n takes time
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000); // 60 second timeout
+        const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
         // Build URL with query parameters
         const url = new URL(BACKEND);
 
         console.log("Sending request to:", url.toString());
 
-        // Show "Deep Thinking..." after 5 seconds
+        // Show "Deep Thinking..." after 10 seconds
         deepThinkingTimeout = setTimeout(() => {
             if (typingMsg.parentElement) {
                 typingMsg.innerHTML = '<em>Deep Thinking...</em><span class="typing-dots"><span></span><span></span><span></span></span>';
